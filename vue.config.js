@@ -7,6 +7,9 @@ const target = TARGET_NODE ? "server" : "client";	//根据环境变量来指向�
 const isDev = process.env.NODE_ENV !== 'production'
 
 module.exports = {
+	devServer: { // 解决跨域问题
+		headers: {'Access-Control-Allow-Origin': '*'}
+	},
 	baseUrl: isDev ? 'http://127.0.0.1:8080' : '',
 	configureWebpack: () => ({
 		// 将 entry 指向应用程序的 server / client 文件

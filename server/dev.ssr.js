@@ -5,6 +5,7 @@ const MemoryFS = require('memory-fs')
 const fs = require('fs')
 const path = require('path')
 const Router = require('koa-router')
+const send = require('koa-send')
 
 // 1.webpack配置文件
 const webpackConfig = require('@vue/cli-service/webpack.config')
@@ -36,11 +37,18 @@ serverCompiler.watch({}, (err, stats) => {
 
 // 处理请求
 const handleRequest = async ctx => {
-	console.log('path', ctx.path)
 	if (!bundle) {
 		ctx.body = "等待webpack打包完成后再访问"
 		return
 	}
+
+	// 代理favicon.ico
+	const url = ctx.path
+	if (url.includes('favicon.ico')){
+		console.log(`proxy ${url}`);
+		return await send(ctx, url, { root: path.resolve(__dirname, '../public') })
+	}
+
 	// 4.获取最新的 vue-ssr-client-manifest.json
 	const clientManifestResp = await axios.get('http://localhost:8080/vue-ssr-client-manifest.json')
 	const clientManifest = clientManifestResp.data

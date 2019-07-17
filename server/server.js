@@ -1,19 +1,15 @@
 // server.js
 const fs = require('fs');
 const path = require('path');
-const Koa = require('koa');
-const koaStatic = require('koa-static');
-const app = new Koa();
+const send = require('koa-send')
+const Router = require('koa-router')
 
 const resolve = file => path.resolve(__dirname, file);
 
-// 开放dist目录
-app.use(koaStatic(resolve('./dist')));
-
 // 获得一个createBundleRenderer
-const { createBundleRenderer } = require('vue-server-renderer');
-const bundle = require('./dist/vue-ssr-server-bundle.json');
-const clientManifest = require('./dist/vue-ssr-client-manifest.json');
+const {createBundleRenderer} = require('vue-server-renderer');
+const bundle = require('../dist/vue-ssr-server-bundle.json');
+const clientManifest = require('../dist/vue-ssr-client-manifest.json');
 
 const renderer = createBundleRenderer(bundle, {
 	runInNewContext: false,
@@ -30,18 +26,26 @@ function renderToString(context) {
 }
 
 // 添加一个中间件来处理所有请求
-app.use(async (ctx, next) => {
+const handleRequest = async (ctx, next) => {
+	const url = ctx.path;
+	console.log(url);
+	if (url.includes('.')) {
+		console.log(`proxy ${url}`)
+		return await send(ctx, url, {root: path.resolve(__dirname, '../dist')})
+	}
+
+	ctx.res.setHeader("Content-Type", "text/html");
 	const context = {
 		title: "ssr test",
-		url: ctx.url
+		url
 	};
-	// 将 context渲染为 HTML
+
+	// 将 context 数据渲染为 HTML
 	const html = await renderToString(context);
 	ctx.body = html;
-});
+}
 
-const port = 1086;
-app.listen(port, () => {
-	console.log(`server started at localhost:${port}`);
-});
+const router = new Router()
+router.get('*', handleRequest)
 
+module.exports = router;

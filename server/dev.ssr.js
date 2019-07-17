@@ -63,6 +63,6 @@ function renderToString(context, renderer) {
 }
 
 const router = new Router()
-router.get('*', handleRequest())
+router.get('*', handleRequest)
 
 module.exports = router;

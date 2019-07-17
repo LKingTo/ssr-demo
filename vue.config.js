@@ -8,9 +8,13 @@ const isDev = process.env.NODE_ENV !== 'production'
 
 module.exports = {
 	devServer: { // 解决跨域问题
+		historyApiFallback: true,
 		headers: {'Access-Control-Allow-Origin': '*'}
 	},
-	baseUrl: isDev ? 'http://127.0.0.1:8080' : '',
+	baseUrl: isDev ? 'http://127.0.0.1:8080' : 'http://127.0.0.1:3000',
+	css: {
+		extract: process.env.NODE_ENV === 'production'
+	},
 	configureWebpack: () => ({
 		// 将 entry 指向应用程序的 server / client 文件
 		entry: `./src/entry-${target}.js`,
@@ -34,36 +38,30 @@ module.exports = {
 			whitelist: [/\.css$/]
 		}) : undefined,
 		optimization: {
-			splitChunks: {
-				chunks: "async",
-				minSize: 30000,
-				minChunks: 2,
-				maxAsyncRequests: 5,
-				maxInitialRequests: 3
-			}
+			splitChunks: TARGET_NODE ? false : undefined
 		},
 		plugins: [TARGET_NODE ? new VueSSRServerPlugin() : new VueSSRClientPlugin()]
 	}),
 	chainWebpack: config => {
-		// config.resolve
-		// 	.alias
-		// 	.set('vue$', 'vue/dist/vue.esm.js');
 		config.module
 			.rule("vue")
 			.use("vue-loader")
 			.tap(options => {
-				merge(options, {
+				return merge(options, {
 					optimizeSSR: false
 				});
 			});
-		config.module
-			.rule('images')
-			.use('url-loader')
-			.tap(options => {
-				merge(options, {
-					limit: 1024,
-					fallback:'file-loader?name=img/[path][name].[ext]'
-				});
-			});
+		// config.module
+		// 	.rule('images')
+		// 	.use('url-loader')
+		// 	.tap(options => {
+		// 		return merge(options, {
+		// 			limit: 1024,
+		// 			fallback:'file-loader?name=img/[path][name].[ext]'
+		// 		});
+		// 	});
+		if (TARGET_NODE) {
+			config.plugins.delete("hmr");
+		}
 	}
 };

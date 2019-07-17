@@ -3,7 +3,7 @@ const webpack = require('webpack')
 const axios = require('axios')
 const MemoryFS = require('memory-fs')
 const fs = require('fs')
-const path = require('paht')
+const path = require('path')
 const Router = require('koa-router')
 
 // 1.webpack配置文件

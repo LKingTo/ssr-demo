@@ -1,5 +1,9 @@
 # ssr-demo
 
+## 参考文献
+- 通过vue-cli3构建一个SSR应用程序：https://www.cnblogs.com/lentoo/p/9637845.html
+- 为我们的SSR程序添加热更新功能：https://www.cnblogs.com/lentoo/p/9790852.html
+
 ## Project setup
 ```
 yarn install
